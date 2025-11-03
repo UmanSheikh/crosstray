@@ -10,6 +10,10 @@ import win32con
 import win32gui
 import win32gui_struct
 
+# Constants for notifications
+NIIF_USER = 4
+NOTIFYICON_VERSION = 4  # Use 4 for hBalloonIcon support (NOTIFYICON_VERSION_4)
+
 # Platform check: Ensure the library is only used on Windows for this version
 if sys.platform != 'win32':
     raise NotImplementedError("CrossTray v0.1.0 supports only Windows. Future versions will add macOS and Linux.")
@@ -255,6 +259,42 @@ class Tray:
         """
         self.notify_id = None  # Reset notify ID
         self.refresh_icon()  # Re-add the icon
+
+    def send_notification(self, title: str, msg: str, icon: str, timeout: int) -> None:
+        """Send a balloon notification from the tray icon.
+
+        Args:
+            title (str): Title of the notification.
+            msg (str): Message body of the notification.
+            icon (str): Path to the icon file.
+            timeout (int): Duration in milliseconds to display the notification.
+        """
+        if not self.hwnd:
+            raise RuntimeError("Tray not initialized")
+
+        if not os.path.isfile(icon):
+            raise ValueError(f"Icon file not found: {icon}")
+
+        hinst = win32api.GetModuleHandle(None)
+        h_balloon_icon = win32gui.LoadImage( # type: ignore
+            hinst, icon, win32con.IMAGE_ICON, 0, 0, win32con.LR_LOADFROMFILE | win32con.LR_DEFAULTSIZE
+        )
+
+        timeout = max(5000, min(timeout, 30000))  # Clamp timeout between 5s and 30s
+
+        nid = (
+            self.hwnd, 
+            0, win32gui.NIF_INFO, 
+            win32con.WM_USER + 20,
+            0, 
+            self.tooltip, 
+            msg, 
+            timeout, 
+            title, 
+            NIIF_USER
+        )
+
+        win32gui.Shell_NotifyIcon(win32gui.NIM_MODIFY, nid) # type: ignore
 
     def run(self) -> None:
         """Start the message pump to handle events.

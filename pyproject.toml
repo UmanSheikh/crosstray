@@ -1,6 +1,6 @@
 [project]
 name = "crosstray"
-version = "0.1.0"
+version = "0.1.1"
 description = "A lightweight Python library for creating system tray icons on Windows. (Future versions will add macOS and Linux support.) No heavy GUI dependencies—just simple status indicators, notifications, and menus."
 readme = "README.md"
 authors = [

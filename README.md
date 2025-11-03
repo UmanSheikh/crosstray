@@ -47,11 +47,11 @@ For more examples, see **Usage**.
 ```python
 from crosstray import Tray
 
-def on_click():
-    print("Tray clicked!")
+def on_click(tray: ct.Tray):
+    tray.send_notification("Tray Clicked", "You clicked the tray icon!", icon="file.ico", timeout=9000)
 
 tray = Tray(icon="icon.ico", tooltip="Hello World")
-tray.on_click = on_click  # Or use tray.add_action("Click", on_click)
+tray.on_click = tray.on_click = lambda: on_click(tray)  # Or use tray.add_action("Click", on_click)
 tray.run()  # Blocks until quit
 ```
 
@@ -93,9 +93,6 @@ asyncio.run(main())
 ```
 
 ---
-
-### Roadmap
-See `ROADMAP.md` for details.
 
 ### Contributing
 Contributions welcome! Fork the repo, create a branch, and submit a PR. See `CONTRIBUTING.md` for guidelines.
